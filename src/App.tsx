@@ -2,6 +2,7 @@ import "./App.css"
 import { Link, BrowserRouter, Routes, Route } from "react-router-dom"
 import JsonForm from "./components/JsonForm"
 import "antd/dist/antd.css"
+import Quill from "./components/Quill"
 
 const basename = process.env.NODE_ENV === "production" ? "/vite-react" : "/"
 
@@ -10,6 +11,7 @@ function App() {
     <BrowserRouter basename={basename}>
       <Routes>
         <Route path="/" element={<JsonForm />} />
+        <Route path="/quill" element={<Quill />} />
       </Routes>
     </BrowserRouter>
   )
