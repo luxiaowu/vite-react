@@ -1,8 +1,15 @@
-import { Button, Form, Input, Tree } from "antd"
-import { useState } from "react"
-import { recursiveSetKey } from "../utils"
-import { set, get, initial, last } from "lodash/fp"
+import { Button, Form, Tree } from "antd"
+import { useEffect, useState } from "react"
+import {
+  recursiveSetKey,
+  getFormData,
+  isJSON,
+  recursiveOmitKey,
+  recursiveGetKey
+} from "../utils"
+import { set, get, initial, last, cloneDeep, dropRight } from "lodash/fp"
 import ReactJson from "react-json-view"
+import InputIME from "./InputIME"
 
 interface TreeNodeData {
   label: string
@@ -13,75 +20,78 @@ interface TreeNodeData {
   key?: string
 }
 
-const JsonForm = () => {
-  const [data, setData] = useState<TreeNodeData[]>(
-    recursiveSetKey([
-      { label: "标题", name: "title", value: "标题1" },
+const defaultData = [
+  {
+    label: "标题",
+    name: "title"
+  },
+  {
+    label: "内容",
+    name: "message"
+  },
+  {
+    label: "按钮",
+    name: "buttons",
+    type: "array",
+    children: [
       {
         label: "按钮",
-        name: "buttons",
-        type: "array",
         children: [
           {
-            label: "按钮",
-            children: [
-              { label: "名称", name: "name", value: "确定" },
-              {
-                label: "动作",
-                name: "action",
-                children: [
-                  {
-                    label: "点击",
-                    name: "click",
-                    value: "aaa",
-                  },
-                ],
-              },
-            ],
+            label: "文案",
+            name: "txt"
           },
-        ],
-      },
-      {
-        label: "模板",
-        name: "template",
-        children: [
           {
-            label: "按钮",
-            name: "buttons",
-            type: "array",
+            label: "动作",
+            name: "act",
             children: [
               {
-                label: "按钮",
-                children: [
-                  { label: "名称", name: "name" },
-                  {
-                    label: "动作",
-                    name: "action",
-                    children: [
-                      {
-                        label: "点击",
-                        name: "click",
-                      },
-                    ],
-                  },
-                ],
+                label: "点击行为",
+                name: "name"
               },
-            ],
-          },
-        ],
-      },
-    ])
+              {
+                label: "行为参数",
+                name: "params",
+                type: "JSON"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
+
+const JsonForm = () => {
+  const [data, setData] = useState<TreeNodeData[]>(
+    recursiveSetKey(cloneDeep(defaultData))
   )
+  const [expandKeys, setExpandKeys] = useState([])
+
+  useEffect(() => {
+    setExpandKeys(recursiveGetKey(data))
+  }, [])
 
   const add =
-    ({ key, children }) =>
+    ({ key, children }, index = undefined) =>
     () => {
+      const nextIndex = index === undefined ? 0 : index
+      const item = [cloneDeep(children[nextIndex])]
+      const nextItem = recursiveOmitKey(
+        index === undefined ? ["key", "value"] : ["key"],
+        cloneDeep(item)
+      )
       const nextData = set(
         `${key}.children`,
-        [...children, { ...children[0], key: undefined }],
+        index === undefined
+          ? [...children, ...nextItem]
+          : children.flatMap((x, i) => (i === index ? [x, nextItem[0]] : [x])),
         data
       )
+      console.log(key, children, index, item, nextItem)
+      console.log(item, nextItem)
       setData(recursiveSetKey(nextData))
+      setExpandKeys(recursiveGetKey(nextData))
     }
 
   const remove = key => () => {
@@ -96,52 +106,51 @@ const JsonForm = () => {
     setData(recursiveSetKey(nextData))
   }
 
-  const onChange = key => e => {
-    const nextData = set(`${key}.value`, e.target.value, data)
+  const onChange = (value, key) => {
+    const nextData = set(`${key}.value`, value || undefined, data)
     // console.log(key, nextData)
     setData(nextData)
   }
 
-  const getValue = arr =>
-    arr.reduce(
-      (acc, cur) => ({
-        ...acc,
-        [cur.name]: cur.children ? getValue(cur.children) : cur.value,
-      }),
-      {}
-    )
+  const onCompositionStart = e => {
+    console.log("onCompositionStart", e)
+  }
 
-  const getFormData = data =>
-    data.reduce((acc, cur) => {
-      // console.log(acc, cur)
-      if (cur.type === "array") {
-        acc[cur.name] = cur.children.map(x => getValue(x.children))
-      } else if (cur.children) {
-        acc[cur.name] = getFormData(cur.children)
-      } else {
-        acc[cur.name] = cur.value
-      }
-      return acc
-    }, {})
-
-  const formData = getFormData(data)
-  console.log(formData)
+  const formData = JSON.parse(JSON.stringify(getFormData(data)))
+  // console.log(formData)
 
   const renderTreeNode = (treeData: TreeNodeData[]) =>
     treeData.map(x => {
       if (x.children) {
-        const parentKey = initial(x.key!.split(".")).join(".")
-        const parentChildren = get(parentKey, data)
+        const parentKey = dropRight(2, x.key!.split(".")).join(".")
+        const parentChildren = get(parentKey + ".children", data)
+        const index = +last(x.key!.split("."))
+        // console.log("p", x.name, parentKey, parentChildren)
         return (
           <Tree.TreeNode
             disabled={!x.name}
             title={
               <>
                 {x.label}
-                {!x.name && +last(x.key!.split(".")) + 1}
+                {!x.name && index + 1}
                 {x.type === "array" && (
                   <Button size="small" type="link" onClick={add(x)}>
                     增加一项
+                  </Button>
+                )}
+                {!x.name && (
+                  <Button
+                    size="small"
+                    type="link"
+                    onClick={add(
+                      {
+                        key: parentKey,
+                        children: parentChildren
+                      },
+                      index
+                    )}
+                  >
+                    向下复制
                   </Button>
                 )}
                 {!x.name && parentChildren.length > 1 && (
@@ -160,12 +169,25 @@ const JsonForm = () => {
       return (
         <Tree.TreeNode
           title={
-            <Form layout="inline">
-              <Form.Item label={x.label}>
-                <Input
+            <Form layout="horizontal">
+              <Form.Item
+                label={x.label}
+                style={{ marginBottom: 0 }}
+                validateStatus={
+                  x.type === "JSON" && x.value && !isJSON(x.value)
+                    ? "error"
+                    : "success"
+                }
+                help={
+                  x.type === "JSON" && x.value && !isJSON(x.value)
+                    ? "请输入JSON格式数据"
+                    : null
+                }
+              >
+                <InputIME
                   size="small"
                   value={x.value}
-                  onChange={onChange(x.key)}
+                  onChange={value => onChange(value, x.key)}
                 />
               </Form.Item>
             </Form>
@@ -176,13 +198,22 @@ const JsonForm = () => {
     })
 
   return (
-    <div style={{ display: "flex", paddingTop: 50 }}>
-      <ReactJson src={data} collapsed={3} displayDataTypes={false} />
-      <Tree showLine selectable={false} defaultExpandAll>
-        {renderTreeNode(data)}
-      </Tree>
-      <ReactJson src={formData} collapsed={3} displayDataTypes={false} />
-    </div>
+    <>
+      <div style={{ display: "flex", paddingTop: 50 }}>
+        <ReactJson src={defaultData} collapsed={3} displayDataTypes={false} />
+        <Tree
+          showLine
+          selectable={false}
+          defaultExpandAll
+          expandedKeys={expandKeys}
+          onExpand={setExpandKeys}
+        >
+          {renderTreeNode(data)}
+        </Tree>
+        <ReactJson src={formData} collapsed={3} displayDataTypes={false} />
+      </div>
+      {/* <Input /> */}
+    </>
   )
 }
 

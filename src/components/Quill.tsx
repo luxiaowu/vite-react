@@ -1,15 +1,15 @@
 const data = [
   {
     desc: "测试",
-    value: "ceshi123123",
+    value: "ceshi123123"
   },
   {
     desc: "测试2",
-    value: "ceshi12311123",
-  },
+    value: "ceshi12311123"
+  }
 ]
 
-import React, { useEffect, useRef } from "react"
+import { useEffect, useRef } from "react"
 import ReactQuill from "react-quill"
 import "react-quill/dist/quill.snow.css"
 
@@ -31,7 +31,7 @@ const CustomToolbar = ({ toolbarId }) => (
           whiteSpace: "nowrap",
           border: "1px dashed #ddd",
           width: 40,
-          marginRight: 10,
+          marginRight: 10
         }}
         className="ql-insert"
         value={x.value}
@@ -49,7 +49,7 @@ const CustomToolbar = ({ toolbarId }) => (
         whiteSpace: "nowrap",
         border: "1px dashed #ddd",
         width: 40,
-        marginRight: 10,
+        marginRight: 10
       }}
       className="ql-insert1"
     >
@@ -63,7 +63,7 @@ const CustomToolbar = ({ toolbarId }) => (
         whiteSpace: "nowrap",
         border: "1px dashed #ddd",
         width: 40,
-        marginRight: 10,
+        marginRight: 10
       }}
       className="ql-insert2"
     >
@@ -107,6 +107,7 @@ const CustomerQuill = ({ value = { convertStr: "", str: "" } }) => {
   }
   return (
     <>
+      <h1>富文本组件</h1>
       <CustomToolbar toolbarId={toolbarRef.current} />
       <ReactQuill
         placeholder="请输入或插入**元"
@@ -116,12 +117,12 @@ const CustomerQuill = ({ value = { convertStr: "", str: "" } }) => {
             handlers: {
               insert,
               insert1,
-              insert2,
-            },
+              insert2
+            }
           },
           clipboard: {
-            matchVisual: false,
-          },
+            matchVisual: false
+          }
         }}
         formats={["bold", "color", "clean"]}
         onChange={handleChange}
@@ -142,12 +143,12 @@ CustomerQuill.modules = {
     handlers: {
       insert,
       insert1,
-      insert2,
-    },
+      insert2
+    }
   },
   clipboard: {
-    matchVisual: false,
-  },
+    matchVisual: false
+  }
 }
 
 /*

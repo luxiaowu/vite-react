@@ -1,20 +1,12 @@
-import "./App.css"
-import { Link, BrowserRouter, Routes, Route } from "react-router-dom"
+import { BrowserRouter, Routes, Route, useRoutes } from "react-router-dom"
+import Layout from "./pages/Layout"
 import JsonForm from "./components/JsonForm"
-import "antd/dist/antd.css"
 import Quill from "./components/Quill"
-
-const basename = process.env.NODE_ENV === "production" ? "/vite-react" : "/"
+import routes from "./config/routes"
+import "./App.css"
 
 function App() {
-  return (
-    <BrowserRouter basename={basename}>
-      <Routes>
-        <Route path="/" element={<JsonForm />} />
-        <Route path="/quill" element={<Quill />} />
-      </Routes>
-    </BrowserRouter>
-  )
+  return useRoutes(routes)
 }
 
 export default App
