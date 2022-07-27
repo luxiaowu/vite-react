@@ -54,8 +54,9 @@ const getFormData = data =>
         .filter(x => isEmptyValue([x]))
         .map(x => getFormData(x.children))
     } else if (cur.children) {
-      acc[cur.name] = getFormData(cur.children)
-    } else {
+      const value = getFormData(cur.children)
+      Object.keys(value).length > 0 && (acc[cur.name] = value)
+    } else if (cur.value) {
       acc[cur.name] =
         cur.type === "JSON" && isJSON(cur.value)
           ? JSON.parse(cur.value)

@@ -59,6 +59,32 @@ const defaultData = [
         ]
       }
     ]
+  },
+  {
+    label: "汽车",
+    name: "car",
+    children: [
+      {
+        label: "品牌",
+        name: "brand",
+        children: [
+          {
+            label: "大众",
+            name: "volkswagen",
+            children: [
+              {
+                label: "凌度L",
+                name: "lamando"
+              }
+            ]
+          },
+          {
+            label: "吉利",
+            name: "greey"
+          }
+        ]
+      }
+    ]
   }
 ]
 
@@ -88,8 +114,8 @@ const JsonForm = () => {
           : children.flatMap((x, i) => (i === index ? [x, nextItem[0]] : [x])),
         data
       )
-      console.log(key, children, index, item, nextItem)
-      console.log(item, nextItem)
+      // console.log(key, children, index, item, nextItem)
+      // console.log(item, nextItem)
       setData(recursiveSetKey(nextData))
       setExpandKeys(recursiveGetKey(nextData))
     }
@@ -112,11 +138,7 @@ const JsonForm = () => {
     setData(nextData)
   }
 
-  const onCompositionStart = e => {
-    console.log("onCompositionStart", e)
-  }
-
-  const formData = JSON.parse(JSON.stringify(getFormData(data)))
+  const formData = getFormData(data)
   // console.log(formData)
 
   const renderTreeNode = (treeData: TreeNodeData[]) =>
