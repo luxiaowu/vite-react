@@ -2,24 +2,17 @@ import { UserOutlined } from "@ant-design/icons"
 
 const menus = [
   {
-    label: "jsonForm",
-    to: "/jsonForm",
-    key: "jsonForm",
+    label: "json-form",
+    to: "/json-form",
+    key: "json-form",
     icon: UserOutlined
   },
   {
-    label: "quill",
-    to: "/quill",
-    key: "quill",
+    label: "editor",
+    to: "/editor",
+    key: "editor",
     icon: UserOutlined
   },
-  {
-    label: "quill-official",
-    to: "/quill-official",
-    key: "quill-official",
-    icon: UserOutlined
-  },
-  ,
   {
     label: "form",
     to: "/form",

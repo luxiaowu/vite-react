@@ -10,6 +10,7 @@ import {
 import { set, get, initial, last, cloneDeep, dropRight } from "lodash/fp"
 import ReactJson from "react-json-view"
 import InputIME from "./InputIME"
+import Editor from "./Editor"
 
 interface TreeNodeData {
   label: string
@@ -39,7 +40,8 @@ const defaultData = [
         children: [
           {
             label: "文案",
-            name: "txt"
+            name: "txt",
+            type: "richText"
           },
           {
             label: "动作",
@@ -206,11 +208,18 @@ const JsonForm = () => {
                     : null
                 }
               >
-                <InputIME
-                  size="small"
-                  value={x.value}
-                  onChange={value => onChange(value, x.key)}
-                />
+                {x.type === "richText" ? (
+                  <Editor
+                    value={x.value}
+                    onChange={value => onChange(value, x.key)}
+                  />
+                ) : (
+                  <InputIME
+                    size="small"
+                    value={x.value}
+                    onChange={value => onChange(value, x.key)}
+                  />
+                )}
               </Form.Item>
             </Form>
           }

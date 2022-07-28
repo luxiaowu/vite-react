@@ -30,7 +30,12 @@ export class ModalForm extends Component {
           打开Drawer
         </Button>
         <Form ref={this.formRef}>
-          <Drawer visible={visible}>
+          <Drawer
+            visible={visible}
+            onClose={() => {
+              this.setState({ visible: false })
+            }}
+          >
             <Form.Item>
               <Input />
             </Form.Item>
